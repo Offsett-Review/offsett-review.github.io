@@ -2,6 +2,23 @@
 
 All notable changes to Offsett Review. Newest first. The top-most `## vX.Y` heading is auto-injected into the footer of the running app.
 
+## v3.16 — 2026-05-26
+
+### Magazine cover
+- Cover logo SVG viewBox tightened from `0 0 296 135` to `39 31 219 73`, cropping the empty padding that surrounds the glyph paths inside the original Figma export. The 77 mm × 27 mm container now renders the actual wordmark at its full intended size — previously the glyph occupied only ~57 mm inside that container because of internal whitespace. Result: the cover logo now reads at the same proportional size as in the Figma `Mag_cover` frame.
+
+## v3.15 — 2026-05-26
+
+### Magazine cover
+- Cover logo resized and repositioned to match Figma "Layer_2" exactly: **77 mm × 27 mm** (the Figma frame is 218 pt × 76 pt at 72 dpi), with `margin: 5mm 0 14mm` so the top of the logo sits ~38 mm from the page edge — the same offset as in the source file. Previously the logo rendered at 130 mm wide with auto height, which made it dominate the cover and push the contents preview far down the page.
+- SVG inside the logo container now uses `width: 100%; height: 100%` instead of intrinsic aspect ratio, locking the rendered logo to the exact Figma frame dimensions.
+
+## v3.14 — 2026-05-26
+
+### Magazine cover
+- The Gambetta "Offsett Review" text wordmark on the cover is gone. The full Figma "Layer_2" inline-SVG logo (rose `#C2948A` + graphite `#2E3532`) replaces it at 130 mm wide, matching the brand mark used on the landing page.
+- Cover meta line now includes the **final rendered page count** alongside the article count: `26 May 2026 · 3 Articles · 14 Pages`. The number is computed at runtime by `PagedConfig.after` (counts `.pagedjs_page` elements after Paged.js finishes paginating) and injected into the `.cover-meta-pages` slot before the print dialog fires. Accurate every time, regardless of article length or content.
+
 ## v3.13 — 2026-05-26
 
 ### Magazine cover
