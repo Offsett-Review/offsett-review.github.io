@@ -12,10 +12,26 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link href="https://api.fontshare.com/v2/css?f[]=gambetta@1,2,3,4,5,6,7,8,9,10&display=swap" rel="stylesheet" />
   <style>
+    /* Gambetta — self-hosted variable fonts (Fontshare, ITF Free License) */
+    @font-face {
+      font-family: 'Gambetta';
+      src: url('./fonts/gambetta-variable.woff2') format('woff2-variations'),
+           url('./fonts/gambetta-variable.woff2') format('woff2');
+      font-weight: 300 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Gambetta';
+      src: url('./fonts/gambetta-variable-italic.woff2') format('woff2-variations'),
+           url('./fonts/gambetta-variable-italic.woff2') format('woff2');
+      font-weight: 300 700;
+      font-style: italic;
+      font-display: swap;
+    }
+
     :root {
       --ff-display: 'Gambetta', Georgia, serif;
       --ff-sans:    'Work Sans', system-ui, sans-serif;
@@ -218,7 +234,7 @@
       </svg>
     </div>
     <div class="hero">
-      <div class="hero-eyebrow">Issue Compiler &middot; v3.5</div>
+      <div class="hero-eyebrow">Issue Compiler</div>
       <h1 class="hero-headline">Turn the web into<br /><em>something worth reading</em></h1>
       <p class="hero-sub">Paste up to three article URLs. We extract, typeset, and bind them into a single editorial PDF &mdash; ready for offline reading on iPad.</p>
     </div>
@@ -270,7 +286,7 @@
   <footer class="app-footer">
     <span class="footer-note">Personal use only &middot; Public URLs only</span>
     <div class="footer-rule"></div>
-    <span class="footer-note">Offsett Review &copy; 2026</span>
+    <span class="footer-note">Offsett Review &middot; <span id="app-version">&mdash;</span> &middot; &copy; 2026</span>
   </footer>
 </div>
 
@@ -413,25 +429,44 @@ function wordCount(html) {
 }
 
 function buildMagazine(articles, date) {
+  const fontBase = new URL('./fonts/', location.href).href;
+
+  let coverImg = '';
+  for (const a of articles) {
+    const m = a.content.match(/<img[^>]+src="([^"]+)"/i);
+    if (!m) continue;
+    try { coverImg = new URL(m[1], a.url).href; break; } catch {}
+  }
+
   const cover = `
-<section class="cover-page">
+<section class="cover-page${coverImg ? ' has-image' : ''}">
+  ${coverImg ? `<img class="cover-hero-image" src="${coverImg}" alt="" referrerpolicy="no-referrer" />` : ''}
   <div class="cover-rule-top"></div>
-  <div class="cover-masthead-logo">
-    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="2" width="14" height="20" stroke="#8b1a1a" stroke-width="1.5"/>
-      <rect x="20" y="14" width="14" height="20" stroke="#8b1a1a" stroke-width="1.5"/>
-      <line x1="2" y1="28" x2="16" y2="28" stroke="#8b1a1a" stroke-width="1.5"/>
-      <line x1="20" y1="8" x2="34" y2="8" stroke="#8b1a1a" stroke-width="1.5"/>
-    </svg>
-  </div>
   <div class="cover-content">
     <div class="cover-eyebrow">Personal Archive</div>
-    <h1 class="cover-title">Offsett<br>Review</h1>
+    <div class="cover-masthead-logo" aria-label="Offsett Review">
+      <svg viewBox="39 31 219 73" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true" preserveAspectRatio="xMinYMid meet">
+        <path d="M39 73.2348C39 54.2074 50.1722 41.1302 66.9263 41.1302C83.8516 41.1302 94.6857 53.5286 94.6857 72.8954C94.6857 91.9184 83.5135 105 66.7594 105C49.8341 105 39 92.5972 39 73.2348ZM83.6333 73.0629C83.6333 56.4543 77.8974 44.451 66.7594 44.451C55.6171 44.451 50.0481 55.9602 50.0481 73.0629C50.0481 89.6716 55.784 101.675 66.922 101.675C78.0643 101.675 83.6333 90.1656 83.6333 73.0629Z" fill="#C2948A"/>
+        <path d="M145.496 41.4094L144.695 48.5624H143.732C140.368 45.4262 137.645 44.3007 135.565 44.3007C132.201 44.3007 130.437 46.874 130.437 54.186V61.9017H140.766L139.644 65.4374H130.433V95.1792C130.433 100.326 130.672 103.058 133.956 103.058V104.025H118.576V103.058C121.859 103.058 122.098 100.326 122.098 95.1792V65.4374H108.803V95.1792C108.803 100.326 109.043 103.058 112.326 103.058V104.025H96.9459V103.058C100.229 103.058 100.469 100.326 100.469 95.1792V65.4374H96.3038V63.5084L98.7181 62.5762C99.7454 62.181 100.452 61.2186 100.524 60.1145C101.244 48.7987 108.799 41.9636 118.169 41.9636C119.53 41.9636 122.094 42.1269 123.374 42.3674L122.574 49.0392H121.615C118.25 46.2253 116.007 45.263 113.927 45.263C110.562 45.263 108.799 47.8363 108.799 55.1483V61.9017H119.774C121.045 61.9017 122.081 60.9093 122.171 59.6377C123.01 47.7075 130.514 41.0013 139.794 41.0013C141.155 41.0013 144.199 41.1645 145.483 41.4051L145.496 41.4094Z" fill="#C2948A"/>
+        <path d="M145.586 82.7721L144.944 72.1608H145.903C149.027 79.0732 152.229 83.0943 158.32 83.0943C162.888 83.0943 166.488 80.6842 166.488 76.1819C166.488 71.9202 163.847 70.2318 157.918 67.0183L154.793 65.33C150.868 63.2421 145.984 60.4282 145.984 53.3525C145.984 45.7141 151.994 41.1345 159.84 41.1345C163.042 41.1345 167.691 41.8605 170.815 43.3856V52.2269H169.852C167.609 46.2769 164.245 43.2224 159.198 43.2224C154.952 43.2224 152.229 45.7141 152.229 49.4946C152.229 54.3965 156.476 56.407 158.719 57.6142L161.762 59.221C167.207 62.1165 172.733 64.6856 172.733 72.1608C172.733 80.1171 166.483 85.1822 157.353 85.1822C153.269 85.1822 148.544 84.2199 145.582 82.7721H145.586Z" fill="#C2948A"/>
+        <path d="M207.02 74.6525C204.058 79.5543 199.093 85.1822 190.442 85.1822C179.227 85.1822 172.819 75.6148 172.819 63.8006C172.819 50.7749 181.307 41.1302 192.282 41.1302C201.494 41.1302 207.581 47.7246 206.939 58.3317H181.547C181.47 58.8945 181.47 59.4572 181.47 60.02C181.47 71.8386 185.553 79.9538 194.444 79.9538C199.572 79.9538 203.172 76.8177 205.578 73.7632L207.02 74.6482V74.6525ZM181.709 55.9216H198.849C199.41 47.6387 197.488 43.2181 191.88 43.2181C186.273 43.2181 182.668 48.8459 181.709 55.9216Z" fill="#C2948A"/>
+        <path d="M255.797 77.1399C253.875 78.7509 251.311 80.435 248.43 80.435C244.505 80.435 242.421 78.1022 242.421 73.6042V45.6325H255.236L256.435 42.0968H242.421V31H241.462C239.583 35.2273 237.768 38.1916 235.507 40.3096C234.27 41.4696 232.627 42.0925 230.932 42.0925H218.633V31H217.675C214.713 37.6718 211.909 41.2075 207.26 43.2181L206.139 43.6992V45.6282H210.304V74.5666C210.304 81.8828 213.826 85.1779 219.995 85.1779C224.481 85.1779 229.446 82.6045 233.213 78.4244L232.01 77.1399C230.088 78.7509 227.524 80.435 224.643 80.435C220.718 80.435 218.633 78.1022 218.633 73.6042V45.6325H234.091V74.5709C234.091 81.8871 237.613 85.1822 243.782 85.1822C248.268 85.1822 253.233 82.6088 257 78.4287L255.797 77.1442V77.1399Z" fill="#C2948A"/>
+        <path d="M149.164 99.6814H147.067V103.973H144.768V92.7776H149.687C150.958 92.7776 151.955 93.0784 152.67 93.6841C153.385 94.2899 153.745 95.1405 153.745 96.236C153.745 97.0394 153.548 97.7138 153.154 98.2552C152.76 98.7965 152.195 99.1874 151.463 99.4237L154.404 103.969H151.784L149.164 99.6772V99.6814ZM147.067 97.8986H149.383C150.059 97.8986 150.555 97.7654 150.877 97.499C151.198 97.2327 151.356 96.8246 151.356 96.2704C151.356 95.7162 151.193 95.308 150.877 95.0417C150.555 94.7753 150.055 94.6421 149.383 94.6421H147.067V97.8986Z" fill="#2E3532"/>
+        <path d="M174.33 102.092V103.973H165.726V92.7776H174.09V94.6593H168.054V97.4432H172.802V99.2433H168.054V102.092H174.325H174.33Z" fill="#2E3532"/>
+        <path d="M191.465 103.973H188.742L184.667 92.7776H187.133L189.483 99.9006L190.125 102.104L190.75 99.9177L193.117 92.7776H195.518L191.46 103.973H191.465Z" fill="#2E3532"/>
+        <path d="M209.011 103.973H206.678V92.7776H209.011V103.973Z" fill="#2E3532"/>
+        <path d="M229.986 102.092V103.973H221.382V92.7776H229.746V94.6593H223.71V97.4432H228.457V99.2433H223.71V102.092H229.981H229.986Z" fill="#2E3532"/>
+        <path d="M246.346 103.973H243.657L240.413 92.7776H242.93L245.091 102.122L247.322 92.7776H249.552L251.816 102.122L253.978 92.7776H256.379L253.135 103.973H250.515L248.961 97.8685L248.439 95.2221H248.405L247.882 97.8685L246.346 103.973Z" fill="#2E3532"/>
+      </svg>
+    </div>
+    <h1 class="cover-title" hidden>Offsett<br>Review</h1>
     <div class="cover-rule"></div>
     <div class="cover-meta">
       <span>${date}</span>
       <span class="cover-meta-dot">&middot;</span>
       <span>${articles.length} Article${articles.length > 1 ? 's' : ''}</span>
+      <span class="cover-meta-dot">&middot;</span>
+      <span class="cover-meta-pages">&mdash; Pages</span>
     </div>
     <div class="cover-contents-preview">
       ${articles.map((a, i) => `
@@ -499,9 +534,6 @@ function buildMagazine(articles, date) {
   }).join('');
 
   const MAGAZINE_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap');
-@import url('https://api.fontshare.com/v2/css?f[]=gambetta@400,500,600,700,1,4,5&display=swap');
-
 @page {
   size: A4;
   margin: 20mm 17mm 18mm 17mm;
@@ -545,18 +577,20 @@ body {
   display: flex; flex-direction: column;
 }
 .cover-rule-top { position: absolute; top: 16mm; left: 17mm; right: 17mm; height: 1px; background: #c2948a; }
-.cover-masthead-logo { display: none; }
+/* Cover wordmark — sized + positioned to match Figma "Layer_2": 218pt × 76pt at x=48pt, y=108pt */
+.cover-masthead-logo {
+  display: block; width: 77mm; height: 27mm;
+  margin: 5mm 0 14mm;
+  overflow: visible;
+}
+.cover-masthead-logo svg { display: block; width: 100%; height: 100%; }
 .cover-content { width: 100%; text-align: left; padding-top: 6mm; }
 .cover-eyebrow {
   font-family: 'Work Sans', sans-serif; font-weight: 400; font-size: 10pt;
   letter-spacing: 0.2em; text-transform: uppercase; color: #555555;
   margin-bottom: 8mm;
 }
-.cover-title {
-  font-family: 'Gambetta', Georgia, serif; font-weight: 700;
-  font-size: 96pt; line-height: 0.95;
-  color: #c2948a; margin-bottom: 6mm; letter-spacing: -0.01em;
-}
+.cover-title { display: none; }
 .cover-rule { display: none; }
 .cover-meta {
   font-family: 'Work Sans', sans-serif; font-weight: 400; font-size: 10pt;
@@ -588,8 +622,37 @@ body {
   color: #555555; letter-spacing: 0.2em; text-transform: uppercase;
 }
 
-/* TOC page merged onto cover \u2014 hide the standalone TOC */
-.toc-page { display: none; }
+/* TOC page merged onto cover \u2014 hide the standalone TOC and kill its page break */
+.toc-page,
+.toc-page.page {
+  display: none !important;
+  break-before: auto !important;
+  page-break-before: auto !important;
+  break-after: auto !important;
+  page-break-after: auto !important;
+}
+
+/* Cover hero image \u2014 flows AFTER cover-content, fills remaining height */
+.cover-page.has-image { padding-bottom: 0; overflow: hidden; }
+.cover-page.has-image .cover-content { flex: 0 0 auto; position: relative; z-index: 1; }
+.cover-hero-image {
+  order: 2;
+  flex: 1 1 auto;
+  width: calc(100% + 34mm);
+  margin: 8mm -17mm 0;
+  min-height: 0;
+  object-fit: cover; object-position: center;
+  display: block;
+}
+.cover-page.has-image .cover-rule-bottom { display: none; }
+.cover-page.has-image .cover-footer {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.92);
+  padding: 4mm 17mm;
+  backdrop-filter: blur(2px);
+  z-index: 1;
+}
 
 /* \u2500\u2500\u2500 ARTICLE \u2500\u2500\u2500 */
 .article-page { padding-top: 0; }
@@ -615,7 +678,7 @@ body {
 }
 .article-title {
   font-family: 'Gambetta', Georgia, serif; font-weight: 400;
-  font-size: 48pt; line-height: 1.1; color: #000000;
+  font-size: 48pt; line-height: 1.1; color: #c2948a;
   margin-bottom: 4mm; letter-spacing: 0; hyphens: auto;
 }
 .article-excerpt {
@@ -627,11 +690,21 @@ body {
 
 .article-body {
   font-family: 'Work Sans', sans-serif; font-weight: 400;
-  font-size: 12pt; line-height: 1.5; color: #000000;
-  letter-spacing: 0.02em; hyphens: auto; text-align: left;
+  font-size: 12pt; line-height: 1.55; color: #000000;
+  letter-spacing: 0.01em; color: #000000;
 }
-.article-body.one-col { columns: 1; max-width: 120mm; }
-.article-body.two-col { columns: 2; column-gap: 7mm; column-rule: none; }
+.article-body.one-col {
+  columns: 1; max-width: 120mm;
+  text-align: left; hyphens: manual; -webkit-hyphens: manual;
+}
+.article-body.two-col {
+  columns: 2; column-gap: 7mm; column-rule: none;
+  text-align: justify;
+  hyphens: auto; -webkit-hyphens: auto;
+  hyphenate-limit-chars: 8 4 3;
+  hyphenate-limit-lines: 2;
+  word-spacing: -0.01em;
+}
 .article-body p { margin-bottom: 3mm; text-indent: 0; }
 .article-body h2 {
   font-family: 'Gambetta', Georgia, serif; font-weight: 600;
@@ -678,7 +751,21 @@ body {
 <title>Offsett Review &mdash; ${date}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+@font-face {
+  font-family: 'Gambetta';
+  src: url('${fontBase}gambetta-variable.woff2') format('woff2-variations'),
+       url('${fontBase}gambetta-variable.woff2') format('woff2');
+  font-weight: 300 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Gambetta';
+  src: url('${fontBase}gambetta-variable-italic.woff2') format('woff2-variations'),
+       url('${fontBase}gambetta-variable-italic.woff2') format('woff2');
+  font-weight: 300 700; font-style: italic; font-display: swap;
+}
+</style>
 <style>${MAGAZINE_CSS}</style>
 </head>
 <body>
@@ -686,6 +773,17 @@ ${cover}
 ${toc}
 ${articlePages}
 <script>
+// Tell the parent window as soon as Paged.js finishes pagination — drives print timing.
+window.PagedConfig = {
+  after: function () {
+    try {
+      var pageCount = document.querySelectorAll('.pagedjs_page').length;
+      var pgEl = document.querySelector('.cover-meta-pages');
+      if (pgEl && pageCount) pgEl.textContent = pageCount + ' Page' + (pageCount > 1 ? 's' : '');
+    } catch (e) {}
+    try { if (window.opener) window.opener.postMessage('paged-ready', '*'); } catch (e) {}
+  }
+};
 // Load Paged.js after content is ready
 var s = document.createElement('script');
 s.src = 'https://unpkg.com/pagedjs/dist/paged.polyfill.js';
@@ -702,7 +800,7 @@ const STEPS = [
   'Fetching articles',
   'Extracting content',
   'Building magazine',
-  'Opening print dialog',
+  'Opening print dialog · allow pop-ups',
 ];
 
 function showProgress() {
@@ -793,31 +891,60 @@ async function generate() {
   const btn = document.getElementById('generate-btn');
   btn.disabled = true;
 
+  // Open the popup IMMEDIATELY so the click's user-activation is still valid.
+  // (Doing this after await-fetch lets the activation expire and Chrome silently blocks the popup.)
+  const win = window.open('', '_blank');
+  if (!win) {
+    stepError(0, 'Pop-up blocked. Allow pop-ups for this site and try again.');
+    btn.disabled = false;
+    return;
+  }
+  try {
+    win.document.open();
+    win.document.write(
+      '<!doctype html><html><head><meta charset="utf-8"><title>Preparing magazine…</title>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400&display=swap" rel="stylesheet">' +
+      '<style>' +
+        'html,body{height:100%;margin:0;background:#ffffff}' +
+        'body{font-family:\'Work Sans\',system-ui,sans-serif;color:#555;' +
+        'display:flex;align-items:center;justify-content:center;' +
+        'letter-spacing:0.2em;text-transform:uppercase;font-size:11px}' +
+        '.loader{display:inline-flex;align-items:baseline;gap:2px}' +
+        '.loader b{display:inline-block;width:3px;height:3px;border-radius:50%;background:#c2948a;' +
+          'margin:0 1px;animation:bounce 1.2s infinite ease-in-out both}' +
+        '.loader b:nth-child(1){animation-delay:-0.32s}' +
+        '.loader b:nth-child(2){animation-delay:-0.16s}' +
+        '@keyframes bounce{0%,80%,100%{opacity:0.25;transform:translateY(0)}' +
+          '40%{opacity:1;transform:translateY(-2px)}}' +
+      '</style></head><body>' +
+      '<span>Preparing your magazine</span>&nbsp;&nbsp;' +
+      '<span class="loader"><b></b><b></b><b></b></span>' +
+      '</body></html>'
+    );
+    win.document.close();
+  } catch {}
+
+  const abort = (stepIdx, msg) => {
+    stepError(stepIdx, msg);
+    if (!win.closed) { try { win.close(); } catch {} }
+    btn.disabled = false;
+  };
+
   // Step 0: Validate
   stepActive(0);
   const urls = [1,2,3]
     .map(i => { const el = document.getElementById('url-' + i); return el ? el.value.trim() : ''; })
     .filter(u => validateURL(u));
 
-  if (urls.length === 0) {
-    stepError(0, 'No valid URLs found. Check your URLs and try again.');
-    btn.disabled = false;
-    return;
-  }
+  if (urls.length === 0) { abort(0, 'No valid URLs found. Check your URLs and try again.'); return; }
   stepDone(0);
 
   // Step 1: Fetch
   stepActive(1);
   const htmlPages = [];
   for (const url of urls) {
-    try {
-      const html = await fetchArticle(url);
-      htmlPages.push({ html, url });
-    } catch (e) {
-      stepError(1, 'Could not fetch ' + url + '. ' + e.message);
-      btn.disabled = false;
-      return;
-    }
+    try { const html = await fetchArticle(url); htmlPages.push({ html, url }); }
+    catch (e) { abort(1, 'Could not fetch ' + url + '. ' + e.message); return; }
   }
   stepDone(1);
 
@@ -825,13 +952,8 @@ async function generate() {
   stepActive(2);
   const articles = [];
   for (const { html, url } of htmlPages) {
-    try {
-      articles.push(extractArticle(html, url));
-    } catch (e) {
-      stepError(2, 'Could not extract article from ' + url + '. ' + e.message);
-      btn.disabled = false;
-      return;
-    }
+    try { articles.push(extractArticle(html, url)); }
+    catch (e) { abort(2, 'Could not extract article from ' + url + '. ' + e.message); return; }
   }
   stepDone(2);
 
@@ -839,36 +961,52 @@ async function generate() {
   stepActive(3);
   const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   let magazineHTML;
-  try {
-    magazineHTML = buildMagazine(articles, date);
-  } catch (e) {
-    stepError(3, 'Failed to build magazine layout. ' + e.message);
-    btn.disabled = false;
-    return;
-  }
+  try { magazineHTML = buildMagazine(articles, date); }
+  catch (e) { abort(3, 'Failed to build magazine layout. ' + e.message); return; }
   stepDone(3);
 
-  // Step 4: Print
+  // Step 4: Print — wait for Paged.js 'paged-ready' postMessage, with a 30s safety net
   stepActive(4);
-  const win = window.open('', '_blank');
-  if (!win) {
-    stepError(4, 'Pop-up blocked. Please allow pop-ups for this site in your browser settings, then try again.');
+
+  if (win.closed) {
+    stepError(4, 'Magazine window was closed before printing. Try again.');
     btn.disabled = false;
     return;
   }
 
-  win.document.open();
-  win.document.write(magazineHTML);
-  win.document.close();
+  let printed = false;
+  const doPrint = () => {
+    if (printed) return;
+    printed = true;
+    window.removeEventListener('message', onMessage);
+    try {
+      if (win.closed) {
+        stepError(4, 'Magazine window was closed before printing.');
+      } else {
+        win.focus();
+        win.print();
+        stepDone(4);
+      }
+    } catch (e) {
+      stepError(4, 'Could not open print dialog. ' + e.message);
+    } finally {
+      btn.disabled = false;
+      refreshButton();
+    }
+  };
+  const onMessage = (e) => {
+    if (e.source === win && e.data === 'paged-ready') doPrint();
+  };
+  window.addEventListener('message', onMessage);
+  setTimeout(doPrint, 30000); // safety net if Paged.js never reports back
 
-  // Give Paged.js time to load and reflow before printing
-  setTimeout(() => {
-    win.focus();
-    win.print();
-    stepDone(4);
-    btn.disabled = false;
-    refreshButton();
-  }, 4000);
+  try {
+    win.document.open();
+    win.document.write(magazineHTML);
+    win.document.close();
+  } catch (e) {
+    abort(4, 'Could not write magazine into popup. ' + e.message);
+  }
 }
 
 // ─── INIT (runs after DOM is ready — script is at bottom of body) ─────────────
@@ -905,6 +1043,19 @@ async function init() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
+
+  // Auto-populate footer version from CHANGELOG.md (first `## vX.Y` heading)
+  try {
+    const res = await fetch('./CHANGELOG.md', { cache: 'no-cache' });
+    if (res.ok) {
+      const text = await res.text();
+      const m = text.match(/^##\s+(v\d[\w.\-]*)/m);
+      if (m) {
+        const el = document.getElementById('app-version');
+        if (el) el.textContent = m[1];
+      }
+    }
+  } catch {}
 
   console.log('[OR] App ready.');
 }
