@@ -9,10 +9,14 @@ A client-side PWA that fetches up to three public article URLs, extracts their c
 
 ```
 offsett-review/
-├── index.html      — App shell + all logic (self-contained)
-├── manifest.json   — PWA manifest (install to home screen)
-├── sw.js           — Service worker (offline support)
-└── README.md       — This file
+├── index.html        — App shell + all logic (self-contained)
+├── manifest.json     — PWA manifest (install to home screen)
+├── sw.js             — Service worker (offline support)
+├── CHANGELOG.md      — Version history (auto-read by app on load)
+├── fonts/
+│   ├── gambetta-variable.woff2         — Gambetta regular (Fontshare)
+│   └── gambetta-variable-italic.woff2  — Gambetta italic (Fontshare)
+└── README.md         — This file
 ```
 
 ---
@@ -66,6 +70,8 @@ npx serve .
    - Sanitizing HTML (DOMPurify)
    - Building magazine layout (Paged.js)
    - Opening print dialog
+
+> URL indicators: rose dot = valid, red dot = blocked or malformed
 4. A new window opens with the typeset magazine
 5. On iPad: tap the Share icon → Save to Files (or print, AirDrop, etc.)
 
@@ -73,23 +79,28 @@ npx serve .
 
 ## Magazine Output
 
-**Cover page** — Dark, editorial masthead with article titles listed  
-**Table of contents** — With leader dots and page numbers  
-**Articles** — Each starts on a new page with feature header  
+**Cover page** — White background, editorial layout. Offsett Review wordmark in terracotta, eyebrow label "Personal Archive", date, article count, and a preview list of article titles with Roman numeral indices. A thin terracotta rule runs across the top and bottom. If any fetched article contains an image, the first one found is used as a hero image filling the lower half of the cover, with a frosted footer overlay.
 
-**Column layout** — Auto-toggled by word count:
-- < 1,200 words → Single centred column (portrait-optimised)
-- ≥ 1,200 words → Two columns with rule (landscape-optimised)
+**Table of contents** — Generated in code but not rendered; suppressed via CSS. Article titles appear on the cover instead.
 
-**Typography features:**
-- Drop cap on first paragraph of each article
-- Running heads (article title left, page number right)
-- Indented paragraphs (editorial convention, no blank lines between)
-- Blockquote pull-quote styling with decorative opening mark
-- Figcaption in mono at reduced size
+**Articles** — Each starts on a new page with a feature header containing the source name, byline (if available), read time (calculated at 220 wpm), article title in Gambetta at 48pt in terracotta, and excerpt in italic Gambetta if present.
 
-**Page size:** A4 (best for iPad screen ratio and general readability)
+**Column layout** — Determined by word count:
+- < 1,200 words → Single left-aligned column, max-width 120mm
+- ≥ 1,200 words → Two justified columns, 7mm gap, no column rule
 
+**Typography:**
+- Body text in Work Sans 12pt, 1.55 line height
+- Headings (h2) in Gambetta semibold 22pt, spanning both columns
+- Subheadings (h3) in Gambetta medium italic 16pt
+- Blockquotes in Gambetta medium italic 18pt with a terracotta left border, spanning both columns
+- Figcaptions in Work Sans 9pt, uppercased, grey
+- Paragraphs spaced with 3mm margin, no text indent
+- No drop cap
+
+**Running heads** — Article title on the top left, page number on the top right. Suppressed on the cover page.
+
+**Page size:** A4 (210 × 297mm), margins 20mm top, 17mm left/right, 18mm bottom.
 ---
 
 ## Architecture
@@ -152,6 +163,5 @@ This gives you a free, controlled, auditable proxy with no third-party data expo
 - **Readability.js** — Mozilla Foundation
 - **DOMPurify** — Cure53
 - **Paged.js** — Pagedmedia.org / W3C Paged Media polyfill
-- **Playfair Display** — Clive Crous & Kaja Reinki (Google Fonts)
-- **EB Garamond** — Georg Duffner (Google Fonts)
-- **DM Mono** — Colophon Foundry (Google Fonts)
+- **Gambetta** — Fontshare / ITF Free License (self-hosted variable font)
+- **Work Sans** — Wei Huang (Google Fonts)
