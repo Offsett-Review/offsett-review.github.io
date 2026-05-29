@@ -1,5 +1,5 @@
-/* Offsett Review — Service Worker v3 */
-const CACHE = 'offsett-review-v3';
+/* Offsett Review — Service Worker v4 */
+const CACHE = 'offsett-review-v4';
 
 const PRECACHE = [
   '/Offsett_review/',
@@ -28,6 +28,7 @@ function isCacheable(request) {
     if (url.protocol === 'data:') return false;
     if (request.method !== 'GET') return false;
     if (url.hostname.includes('allorigins.win')) return false;
+    if (url.hostname.includes('goatcounter') || url.hostname.includes('zgo.at')) return false;
     if (!['http:', 'https:'].includes(url.protocol)) return false;
     return true;
   } catch {
