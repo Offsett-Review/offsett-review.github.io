@@ -2,6 +2,12 @@
 
 All notable changes to Offsett Review. Newest first. The top-most `## vX.Y` heading is auto-injected into the footer of the running app.
 
+## v3.21 — 2026-05-29
+
+### UI
+- Right-side image panel no longer overlaps the footer/version band. Removed the explicit `height: 100vh` from both `.app-main` and `.app-main::after` — the panel is now bounded by `top: 0 / bottom: 0` so it fills exactly the main content area between the sticky header and the footer, sitting cleanly above the version band. Added `background-position: center` so the photo stays centred when the panel is resized.
+- Added a feedback link in the footer centre: "Spot any bugs or have suggestions?" — opens the user's mail client to `info.offsett.review@gmail.com` with a pre-filled subject. Replaces the decorative 40 px footer rule. Styled to match the footer notes (Work Sans 10 px uppercase) with an underline that turns rose on hover.
+
 ## v3.20 — 2026-05-29
 
 ### Analytics
