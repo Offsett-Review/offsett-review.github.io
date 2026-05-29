@@ -13,6 +13,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- Privacy-first analytics (GoatCounter): cookieless, no PII, no consent banner.
+       Replace MYCODE below with your GoatCounter site code once signed up
+       (e.g. https://offsett.goatcounter.com/count). -->
+  <script data-goatcounter="https://MYCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   <style>
     /* Gambetta — self-hosted variable fonts (Fontshare, ITF Free License) */
     @font-face {
@@ -352,15 +356,18 @@ function validateURL(raw) {
 
 const PROXIES = [
   {
+    name: 'allorigins',
     build: url => 'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
     extract: json => json.contents,
   },
   {
+    name: 'corsproxy',
     build: url => 'https://corsproxy.io/?' + encodeURIComponent(url),
     extract: text => text,   // returns raw HTML directly
     raw: true,
   },
   {
+    name: 'codetabs',
     build: url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
     extract: text => text,   // returns raw HTML directly
     raw: true,
@@ -410,6 +417,7 @@ async function fetchArticle(rawUrl) {
       const contents = proxy.raw ? body : proxy.extract(body);
       if (!isUsableHTML(contents)) throw new Error('Unusable or thin response (proxy error page / redirect stub)');
       console.log('[OR] Fetched via proxy:', endpoint.split('?')[0]);
+      track('proxy-used', { via: proxy.name });
       return contents;
     } catch (e) {
       console.warn('[OR] Proxy failed:', e.message);
@@ -844,6 +852,25 @@ const STEPS = [
   'Opening print dialog · allow pop-ups',
 ];
 
+// Short slugs for the five pipeline stages, used in failure analytics events.
+const FAIL_STEPS = ['validate', 'fetch', 'extract', 'build', 'print'];
+
+// Privacy-first analytics: fire a cookieless GoatCounter event. Aggregate only —
+// never sends submitted URLs, titles, or any PII. Fire-and-forget, online-gated,
+// and wrapped so analytics can never break or block generation.
+function track(name, props) {
+  try {
+    if (!navigator.onLine) return;
+    const gc = window.goatcounter;
+    if (!gc || typeof gc.count !== 'function') return;
+    let path = name;
+    if (props) {
+      for (const k in props) path += '-' + k + '-' + props[k];
+    }
+    gc.count({ path: path, title: name, event: true });
+  } catch (e) {}
+}
+
 function showProgress() {
   const bar = document.getElementById('progress-bar');
   const container = document.getElementById('progress-steps');
@@ -937,6 +964,7 @@ async function generate() {
   const win = window.open('', '_blank');
   if (!win) {
     stepError(0, 'Pop-up blocked. Allow pop-ups for this site and try again.');
+    track('popup-blocked');
     btn.disabled = false;
     return;
   }
@@ -993,6 +1021,7 @@ async function generate() {
   const abort = (stepIdx, msg) => {
     stepError(stepIdx, msg);
     mstep(stepIdx, 'error');
+    track('generation-failed', { step: FAIL_STEPS[stepIdx] || stepIdx });
     if (!win.closed) { try { win.close(); } catch {} }
     btn.disabled = false;
   };
@@ -1053,6 +1082,7 @@ async function generate() {
         win.focus();
         win.print();
         stepDone(4);
+        track('magazine-generated', { articles: articles.length });
       }
     } catch (e) {
       stepError(4, 'Could not open print dialog. ' + e.message);

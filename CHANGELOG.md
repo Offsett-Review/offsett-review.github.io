@@ -2,6 +2,19 @@
 
 All notable changes to Offsett Review. Newest first. The top-most `## vX.Y` heading is auto-injected into the footer of the running app.
 
+## v3.20 — 2026-05-29
+
+### Analytics
+- Added `proxy-used` event: on a successful fetch, records which proxy served the content (`via=allorigins / corsproxy / codetabs`). Surfaces proxy health and failover patterns at a glance — e.g. an AllOrigins outage shows up as traffic shifting to the fallbacks.
+
+## v3.19 — 2026-05-29
+
+### Analytics (privacy-first)
+- Integrated **GoatCounter** — cookieless, no PII, no consent banner. Snippet added to `<head>`; replace the `MYCODE` placeholder with your GoatCounter site code after signing up.
+- Added a `track()` helper: online-gated, fire-and-forget, wrapped so analytics can never throw or block generation. Aggregate events only — it never sends submitted URLs, article titles, or any identifying data.
+- Events wired into `generate()`: `magazine-generated` (with article count 1–3), `generation-failed` (tagged with the failing stage: validate / fetch / extract / build / print), and `popup-blocked`. Note: a true "download" can't be observed — the browser print dialog gives no completion signal — so success is measured at print-dialog open.
+- Service worker bumped to `offsett-review-v4` and now excludes GoatCounter hosts (`goatcounter.com`, `zgo.at`) from caching, so analytics requests are never cached or served stale.
+
 ## v3.18 — 2026-05-29
 
 ### Fetch resilience
