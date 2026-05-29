@@ -2,6 +2,28 @@
 
 All notable changes to Offsett Review. Newest first. The top-most `## vX.Y` heading is auto-injected into the footer of the running app.
 
+## v3.18 — 2026-05-29
+
+### Fetch resilience
+- **URL normalisation:** `open.substack.com/pub/<pub>/p/<slug>` share links are rewritten to `https://<pub>.substack.com/p/<slug>` before fetching, so proxies that don't follow 30x redirects still land on real content. (Only AllOrigins follows redirects; when it's down — as it was during testing — the fallback proxies otherwise returned a redirect stub.)
+- **Response validation (`isUsableHTML`):** proxy responses are now rejected and failed over if they're under 1500 bytes, non-HTML, or match known junk signatures — AllOrigins/Cloudflare `error code: 5xx` bodies, the corsproxy.io landing page, or a Cloudflare "Just a moment" challenge. Previously any response over 100 bytes was accepted, which let proxy error pages and redirect stubs through and produced half-empty or unextractable issues.
+- **Upstream status check:** AllOrigins reports the origin's HTTP status; a non-200 now triggers failover to the next proxy instead of passing through an error page.
+
+## v3.17 — 2026-05-29
+
+### Magazine — heading extraction fix (root cause)
+- **In-article section headings were being deleted by Readability, not by CSS.** Readability's `_cleanHeaders` removes any `<h1>`/`<h2>` whose CSS class/id scores a negative "class weight." Publications on Astro / Substack custom domains tag section headers with classes like `header-anchor-post`, which trips that filter — so headers such as "1) Seneca", "2) Søren Kierkegaard", etc. were stripped during extraction, before the layout engine ever saw them. `extractArticle()` now removes `class`/`id` from all heading tags *before* Readability parses, preserving every in-article heading. Verified against theculturist.io (5/5 headings recovered).
+- Heading CSS hardened alongside: `h1`–`h4` all styled; removed `column-span: all` and `break-after: avoid` (Paged.js duplicated/dropped adjacent lines around column-spanning headings); added `break-inside: avoid`.
+
+### Magazine — typography
+- Two-column body switched from forced justify to **left-aligned** (ragged right) with automatic hyphenation retained — eliminates the wide inter-word gaps that justify produced on short lines.
+
+### UI — progress feedback
+- The generation pop-up now shows the five progress markers (Validating → Fetching → Extracting → Building → Print) beneath the "Preparing your magazine" loader, synced live with the main window via a same-origin `mstep()` mirror.
+
+### Brand
+- Accent colour unified to **`#D39385`** across the UI shell, magazine print layout, and both inline logo SVGs (previously the print layout and logos used the older `#C2948A`). Figma source and project documentation updated to match.
+
 ## v3.16 — 2026-05-26
 
 ### Magazine cover
